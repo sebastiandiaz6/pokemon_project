@@ -12,6 +12,8 @@ import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import TypeContainer from './TypeContainter';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 
 function App() {
 
@@ -20,6 +22,7 @@ function App() {
   const [pokemonData, setPokemonData] = useState(null)
   const [allPokemon, setAllPokemon] = useState([])
   const [pokemon, setPokemon] = useState([])
+  const [pokemonTeam, setPokemonTeam] = useState([])
 
   useEffect(() => {
     loadData()
@@ -33,7 +36,6 @@ function App() {
     axios.get(pokemon)
       .then(resp => {
         setPokemonData(resp.data)
-        console.log(pokemonData)
       })
   }
 
@@ -43,6 +45,23 @@ function App() {
         setAllPokemon(resp.data.results)
       })
   }
+
+  const addToTeam = () => {
+    if (pokemonTeam.length <= 5) {
+      setPokemonTeam(prevTeam =>
+        [...prevTeam, pokemonData]
+      )
+      setPokemon([])
+    } else {
+      window.alert('You can have no more than 6 pokemon')
+      setPokemon([])
+    }
+
+  }
+  const deleteToTeam = (index) => {
+    setPokemonTeam(prevTeam => prevTeam.filter((item, i) => index !== i))
+  }
+  console.log(pokemonTeam)
 
   return (
     <div className="App">
@@ -71,31 +90,59 @@ function App() {
           </Select>
         </FormControl>
 
-        {
-          pokemonData?.sprites?.front_default && (
-            <Card sx={{ maxWidth: 245, maxHeight: 460 }} className='card'>
-              {<CardMedia
-                component="img"
-                image={pokemonData.sprites.front_default}
-                alt="Pokémon"
-              />}
-              <CardContent>
-                <Typography gutterBottom variant="h5" component="div" className='capitalize_letter'>
-                  {pokemonData.name}
-                </Typography>
-                <div className='types_container'>
-                  {pokemonData.types.map(type =>
-                    <TypeContainer type={type.type.name} />
-                  )}
-                </div>
-              </CardContent>
-              <CardActions className='button_card'>
-                <Button size="small">Show Stats</Button>
-                <Button size="small">Delete</Button>
-              </CardActions>
-            </Card>
-          )
-        }
+        <div className='pokemon_team'>
+          <div className='your_team'>
+            <h1>Your Team</h1>
+
+            <div className='contain_team'>
+              {
+                pokemonTeam.length !== 0 && (
+                  pokemonTeam.map((pok, index) =>
+                    <Card sx={{ maxWidth: 245, maxHeight: 460 }} className='card card2'>
+                      <CardMedia
+                        component="img"
+                        image={pok.sprites.front_default}
+                        alt="Pokémon"
+                        className='pokemon_img'
+                      />
+                      <DeleteIcon className='delete_icon' onClick={() => deleteToTeam(index)} />
+                    </Card>)
+                )
+              }
+            </div>
+
+          </div>
+          {
+            (pokemonData?.sprites?.front_default) && (
+              <div className='contein_choose'>
+                <Card sx={{ width: 245, height: 410 }} className='card'>
+                  {<CardMedia
+                    component="img"
+                    image={pokemonData.sprites.front_default}
+                    alt="Pokémon"
+                  />}
+                  <CardContent>
+                    <Typography gutterBottom variant="h5" component="div" className='capitalize_letter'>
+                      {pokemonData.name}
+                    </Typography>
+                    <div className='types_container'>
+                      {pokemonData.types.map(type =>
+                        <TypeContainer type={type.type.name} />
+                      )}
+                    </div>
+                  </CardContent>
+                  <CardActions className='button_card'>
+                    <Button size="small">Show Stats</Button>
+                    <Button size="small" onClick={() => addToTeam()}>Add to team</Button>
+                  </CardActions>
+                </Card>
+              </div>
+            )
+          }
+        </div>
+        <div className='confirm_button'>
+          <Button variant="contained">Add team</Button>
+        </div>
       </div>
     </div >
   );
